@@ -59,6 +59,23 @@
          font: 600 14px var(--font-body); padding: 12px 18px; border-radius: 999px; cursor: pointer;
          box-shadow: 0 4px 14px var(--shadow); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
   #back { right: calc(16px + env(safe-area-inset-right, 0px)); }
+  dialog.pop { border: 0; padding: 0; border-radius: 14px; background: var(--chip); color: var(--fg);
+               width: var(--pw, 900px); max-width: calc(100vw - 24px); max-height: calc(100vh - 32px);
+               max-height: calc(100dvh - 32px); overflow: hidden; box-shadow: 0 18px 48px var(--shadow); }
+  dialog.pop::backdrop { background: rgba(17, 17, 17, 0.45); }
+  .pop-head { display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 18px;
+              border-bottom: 1px solid var(--line); }
+  .pop-titles { flex: 1; min-width: 0; }
+  .pop-tag { display: block; font: 600 11px var(--font-body); letter-spacing: 0.06em; text-transform: uppercase;
+             color: var(--muted); }
+  .pop-head h2 { margin: 2px 0 0; font: 600 16px var(--font-body); color: var(--accent-text); text-wrap: balance; }
+  .pop-close { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line);
+               background: var(--bg); color: var(--fg); font: 400 22px/1 var(--font-body); cursor: pointer; }
+  .pop-close:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+  .pop-body { overflow: auto; max-height: calc(100vh - 32px - 64px); max-height: calc(100dvh - 32px - 64px);
+              padding: 12px; background: var(--bg); }
+  .crop { position: relative; overflow: hidden; border-radius: 10px; margin: 0 auto; }
+  .crop img { position: absolute; max-width: none; display: block; }
   @media (max-width: 760px) {
     header h1 { font-size: 15px; }
     .hint { display: none; }
@@ -94,6 +111,13 @@
   </section>
 </main>
 <button class="fab" id="back" type="button" hidden>&larr; Short version</button>
+<dialog class="pop" id="pop" aria-labelledby="popTitle">
+  <div class="pop-head">
+    <div class="pop-titles"><span class="pop-tag">Explain more</span><h2 id="popTitle"></h2></div>
+    <button class="pop-close" id="popClose" type="button" aria-label="Close">&times;</button>
+  </div>
+  <div class="pop-body"><div class="crop" id="crop"><img id="cropImg" alt=""></div></div>
+</dialog>
 
 <script>
 const SHORT = {"aspect": 3.981989770299149, "boxes": {"data": [0.11538, 0.03284, 0.88462, 0.08914], "s1": [0.11538, 0.0988, 0.88462, 0.13948], "s2": [0.11538, 0.14914, 0.88462, 0.17908], "timings": [0.04769, 0.20536, 0.95231, 0.28524], "s3": [0.11538, 0.30958, 0.88462, 0.36754], "s4": [0.11538, 0.38377, 0.88462, 0.4328], "scores": [0.04769, 0.44246, 0.95231, 0.54268], "fixed_a": [0.04769, 0.56355, 0.34, 0.61858], "fixed_b": [0.04769, 0.6236, 0.34, 0.68101], "fixed_c": [0.04769, 0.68604, 0.34, 0.73064], "shared_a": [0.35385, 0.56355, 0.64615, 0.61858], "shared_b": [0.35385, 0.6236, 0.64615, 0.68101], "shared_c": [0.35385, 0.68604, 0.64615, 0.73064], "indiv_a": [0.66, 0.56355, 0.95231, 0.61858], "indiv_b": [0.66, 0.6236, 0.95231, 0.68101], "indiv_c": [0.66, 0.68604, 0.95231, 0.73064], "s5": [0.04769, 0.74223, 0.95231, 0.76135], "s6": [0.11538, 0.79419, 0.88462, 0.81274], "t6a": [0.04769, 0.82433, 0.34, 0.93358], "t6b": [0.35385, 0.82433, 0.64615, 0.93879], "t6c": [0.66, 0.82433, 0.95231, 0.91937], "key": [0.11538, 0.95038, 0.88462, 0.98377]}}, FULL = {"aspect": 5.794566317107373, "boxes": {"data": [0.11538, 0.02257, 0.88462, 0.07713], "s1": [0.11538, 0.08377, 0.88462, 0.12968], "s2": [0.11538, 0.13632, 0.88462, 0.16467], "timings": [0.04769, 0.18273, 0.95231, 0.24623], "s3": [0.11538, 0.26296, 0.88462, 0.32482], "s4": [0.11538, 0.33597, 0.88462, 0.38033], "scores": [0.04769, 0.38697, 0.95231, 0.52379], "fixed_a": [0.04769, 0.53813, 0.34, 0.59057], "fixed_b": [0.04769, 0.59402, 0.34, 0.63553], "fixed_c": [0.04769, 0.63899, 0.34, 0.67652], "shared_a": [0.35385, 0.53813, 0.64615, 0.59057], "shared_b": [0.35385, 0.59402, 0.64615, 0.63553], "shared_c": [0.35385, 0.63899, 0.64615, 0.67652], "indiv_a": [0.66, 0.53813, 0.95231, 0.59057], "indiv_b": [0.66, 0.59402, 0.95231, 0.63553], "indiv_c": [0.66, 0.63899, 0.95231, 0.67652], "s5": [0.04769, 0.68449, 0.95231, 0.70708], "s6": [0.11538, 0.72964, 0.88462, 0.74502], "t6a": [0.04769, 0.75299, 0.34, 0.87277], "t6b": [0.35385, 0.75299, 0.64615, 0.95794], "t6c": [0.66, 0.75299, 0.95231, 0.86042], "key": [0.11538, 0.9659, 0.88462, 0.98885]}}, NAMES = {"data": "The data", "s1": "1 Compute HUMP's direct movement", "s2": "2 Subtract it from the participant's movement", "timings": "Three timings to compare", "s3": "3 Count the terms per joint", "s4": "4 Fit the terms at three timings", "scores": "How I scored each fit", "s5": "5 Compare the three timings", "s6": "6 Test individual timing against the scene", "t6a": "6a The timing", "t6b": "6b Where the fit passes", "t6c": "6c The bounce angles", "key": "Key finding", "fixed_a": "Fixed timing, set the timing", "fixed_b": "Fixed timing, score the fit", "fixed_c": "Fixed timing, unseen movements", "shared_a": "Shared timing, set the timing", "shared_b": "Shared timing, score the fit", "shared_c": "Shared timing, unseen movements", "indiv_a": "Individual timing, set the timing", "indiv_b": "Individual timing, score the fit", "indiv_c": "Individual timing, unseen movements"};
@@ -113,7 +137,7 @@ for (const [id, b] of Object.entries(SHORT.boxes)) {
   btn.style.left = (b[2] * 100) + "%";
   btn.setAttribute("aria-label", "Explain more: " + NAMES[id]);
   btn.innerHTML = 'i<span class="tip">Explain more</span>';
-  btn.addEventListener("click", () => openBlock("full", id));
+  btn.addEventListener("click", () => openPop(id));
   V.short.sheet.appendChild(btn);
   buttons.push([btn, b]);
 }
@@ -132,7 +156,7 @@ function show(view) {
   $("hint").innerHTML = view === "short"
     ? 'Short version. Click <span class="dot">i</span> on any block to explain more.' : "Full version.";
   $("note").innerHTML = view === "short"
-    ? 'Tap <span class="dot">i</span> on a block to explain more. Swipe sideways to see the whole width.'
+    ? 'Tap <span class="dot">i</span> on a block to explain more.'
     : "Full version.";
 }
 
@@ -155,11 +179,42 @@ async function openBlock(view, id) {
   setTimeout(() => g.remove(), 2600);
 }
 
+// the pop-up: the same block cut out of the full flowchart, at a readable size; the short page stays behind it
+const pop = $("pop"), crop = $("crop"), cropImg = $("cropImg");
+let popId = null;
+function layoutPop() {
+  const img = V.full.img, nW = img.naturalWidth, nH = img.naturalHeight, b = FULL.boxes[popId];
+  const padX = 0.006, padY = 0.0015 / FULL.aspect;                 // little above and below: no connector stubs
+  const x0 = Math.max(0, b[0] - padX), x1 = Math.min(1, b[2] + padX);
+  const y0 = Math.max(0, b[1] - padY), y1 = Math.min(1, b[3] + padY);
+  const natW = nW * (x1 - x0), natH = nH * (y1 - y0);
+  const cw = Math.min(natW * 0.8, 920, window.innerWidth - 24 - 24);
+  const s = cw / natW;
+  pop.style.setProperty("--pw", (cw + 24) + "px");
+  Object.assign(crop.style, { width: cw + "px", height: natH * s + "px" });
+  Object.assign(cropImg.style, { width: nW * s + "px", height: nH * s + "px", left: -x0 * nW * s + "px",
+                                 top: -y0 * nH * s + "px" });
+}
+async function openPop(id) {
+  popId = id;
+  await ready(V.full.img);
+  if (!cropImg.src) cropImg.src = V.full.img.src;
+  $("popTitle").textContent = NAMES[id];
+  layoutPop();
+  pop.showModal();
+  document.body.style.overflow = "hidden";
+  pop.querySelector(".pop-body").scrollTop = 0;
+}
+pop.addEventListener("close", () => { document.body.style.overflow = ""; });
+pop.addEventListener("click", e => { if (e.target === pop) pop.close(); });   // a tap outside the box
+$("popClose").addEventListener("click", () => pop.close());
+window.addEventListener("resize", () => { if (pop.open) layoutPop(); });
+
 $("bShort").addEventListener("click", () => openBlock("short", lastBlock));
 $("bFull").addEventListener("click", () => openBlock("full", lastBlock));
 $("back").addEventListener("click", () => openBlock("short", lastBlock));
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape" && current === "full") openBlock("short", lastBlock);
+  if (e.key === "Escape" && current === "full" && !pop.open) openBlock("short", lastBlock);
 });
 </script>
 </body>
